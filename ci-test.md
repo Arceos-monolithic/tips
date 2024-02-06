@@ -18,7 +18,7 @@
 
 - 目前希望对架构（`RISC-V/x86_64/aarch64`）和文件系统（`fat32/ext4`）单独测试。
 
-  - 杨老师，我们理解车载系统不需要 `RISC-V` 和 `fat32`，但因为项目是从这两个的组合起步的，因此加入这些测试能帮助我们分析问题是出在移植代码上还是功能代码上。
+  - 对于与杨坤老师讨论的，关于车载系统暂不需要 `RISC-V` 和 `fat32`的问题，由于项目是从RISC-V与fat32的组合起步的，因此加入这些(RISCV-V, x86_64, aarch64)架构测试，既能帮助我们分析定位内核问题是出在移植代码上还是功能代码上，又能讲内核调试开发及测试方法，快速平替到车载系统的aarch64架构上。
 
 - 希望测试能更灵活，粒度更小
   目前的测试的主要代码在 `https://github.com/Arceos-monolithic/Starry/blob/x86_ZLMediaKit/testcases/testsuits-x86_64-linux-musl/test_all.sh` 包含 `libc-test` `busybox-test` `iozone` `lmbench` `netperf` 等等。
@@ -33,8 +33,9 @@
   
   期望能实现以下功能：
   
-  - 每个测例集包含许多测例，经常是个别测例无法通过，希望脚本能具体区分个别测例。
-  - 有些测例失败时会自行退出，但另一些测例可能导致系统崩溃（这通常是系统本身设计不完善的问题）。希望脚本能区分这种情况，并且在系统崩溃时自动重启 Qemu，继续运行接下来的测例。
+  - 每个测例集包含许多测例，经常是个别测例无法通过，希望脚本能具体区分个别测例，实现对单个测试用例, 如`./runtest.exe -w entry-static.exe argv`，区分通过或不通过。
+  - 有些测例失败时会自行退出，但另一些测例可能导致系统崩溃（这通常是系统本身设计不完善的问题）。希望脚本能区分这种情况，并且在系统崩溃时自动重启 Qemu，继续运行接下来的测例。方式可以通过：分别地维护通过列表和不通过列表。
+  - 对通过与不通过的测试用例，输出数据统计；
 
 - 完善“跳过测试”的功能。
 
@@ -44,6 +45,8 @@
 ## 一些参考
 
 - 一个同学做的简单 CI 版本。 `https://github.com/cg1937/starry_ext4/tree/main/.github`
+
+- zCore的CI测试，支持的架构及测试用例比较全： `https://github.com/rcore-os/zCore/blob/master/.github/workflows/test.yml`
 
 - OS比赛的初赛测试。用 python 脚本检查逐行比对测例输出。`https://github.com/oscomp/testsuits-for-oskernel/tree/main/riscv-syscalls-testing`
 
