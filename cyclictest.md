@@ -456,3 +456,22 @@ make: *** [Makefile:91: bld/cyclictest.o] Error 1
 - x86+musl：编译后的可执行文件 `cyclictest`不对，在 x86 本机和 Starry 内部都无法获取正确输出
 
 - x86+gnu：编译正常，在 x86 本机可以通过测试。在 Starry 内部由于对 glibc 的支持不足，会出现 glibc 库中的报错，还待进一步修复
+
+### cyclictest 运行问题修复
+当使用基于musl libc的编译器去编译`cyclictest`时，生成的程序在Linux及Starry上运行时，都会报错 `unable to get scheduler parameters`.
+
+跟踪该问题发现在`musl libc`库中，`sched_setscheduler`的实现直接返回`-ENOSYS`错误码，并未实现函数体及系统调用应有的功能，如下代码段。
+
+类似sched功能的函数， 未实现直接返回错误码的函数还包括：`sched_getparam`, `sched_getscheduler`, `sched_setparam`, `sched_setscheduler`；
+```
+int sched_setscheduler(pid_t pid, int sched, const struct sched_param *param)
+{
+        return __syscall_ret(-ENOSYS);
+}
+```
+找到问题原因后，补齐修复这些函数即可。。。
+
+修改的代码请见：https://github.com/oscomp/testsuits-for-oskernel/commit/ff6e2c51c5b9c365d1813e8ed37b6b8b8c3977fa
+
+修复后生成的多个架构测试用例请见：https://github.com/rcore-os/testsuits-for-oskernel/releases/tag/pre-20240309
+
